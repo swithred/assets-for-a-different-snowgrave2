@@ -1,0 +1,28 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DELTARUNE: A different snowgrave</title><style>html,body{margin:0;width:100%;height:100%;background:#000;color:#fff;font-family:Arial,sans-serif}body{display:flex;align-items:center;justify-content:center}.box{width:min(760px,92vw);text-align:center}.bar{height:12px;border:1px solid #fff;margin-top:16px}.fill{height:100%;width:0;background:#fff}.small{margin-top:10px;font-size:14px;color:#bbb;word-break:break-word}</style></head><body><div class="box"><div id="status">Preparing…</div><div class="bar"><div class="fill" id="fill"></div></div><div class="small" id="detail"></div></div><script>
+const BASE_URL = 'https://cdn.jsdelivr.net/gh/swithred/minecraft-stream@main/';
+const PARTS = ['deltarune.part01','deltarune.part02','deltarune.part03','deltarune.part04'];
+const statusEl=document.getElementById('status'),detailEl=document.getElementById('detail'),fillEl=document.getElementById('fill');
+function setProgress(p){fillEl.style.width=Math.max(0,Math.min(100,p*100))+'%';}
+async function fetchPart(name,index){
+  const url=BASE_URL+name+'?v=1';
+  const r=await fetch(url,{cache:'no-store'});
+  if(!r.ok) throw new Error(`HTTP ${r.status} while fetching ${name}`);
+  const len=Number(r.headers.get('content-length'))||0;
+  if(!r.body){const buf=await r.arrayBuffer(); setProgress((index+1)/PARTS.length); return buf;}
+  const reader=r.body.getReader(); let total=0; const chunks=[];
+  while(true){const {done,value}=await reader.read(); if(done) break; chunks.push(value); total+=value.byteLength; const local=len?total/len:0; setProgress((index+local)/PARTS.length); detailEl.textContent=`File ${index+1}/${PARTS.length}: ${(total/1048576).toFixed(1)} MiB${len?' / '+(len/1048576).toFixed(1)+' MiB':''}`;}
+  const buf=new Uint8Array(total); let off=0; for(const c of chunks){buf.set(c,off); off+=c.byteLength;} return buf.buffer;
+}
+(async()=>{
+  try{
+    const buffers=[];
+    for(let i=0;i<PARTS.length;i++){statusEl.textContent=`Loading file ${i+1}/${PARTS.length}…`; buffers.push(await fetchPart(PARTS[i],i));}
+    statusEl.textContent='Reassembling…'; detailEl.textContent='';
+    const total=buffers.reduce((n,b)=>n+b.byteLength,0); const out=new Uint8Array(total); let off=0;
+    for(const b of buffers){out.set(new Uint8Array(b),off); off+=b.byteLength;}
+    setProgress(1); statusEl.textContent='Launching…';
+    const blob=new Blob([out],{type:'text/html'}); const url=URL.createObjectURL(blob); location.replace(url);
+  }catch(e){statusEl.textContent='Failed to load'; detailEl.textContent=e&&e.stack?e.stack:String(e);}
+})();
+</script></body></html>
