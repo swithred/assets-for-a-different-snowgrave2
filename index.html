@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DELTARUNE: A different snowgrave</title><style>html,body{margin:0;width:100%;height:100%;background:#000;color:#fff;font-family:Arial,sans-serif}body{display:flex;align-items:center;justify-content:center}.box{width:min(760px,92vw);text-align:center}.bar{height:12px;border:1px solid #fff;margin-top:16px}.fill{height:100%;width:0;background:#fff}.small{margin-top:10px;font-size:14px;color:#bbb;word-break:break-word}</style></head><body><div class="box"><div id="status">Preparing…</div><div class="bar"><div class="fill" id="fill"></div></div><div class="small" id="detail"></div></div><script>
-const BASE_URL = 'https://cdn.jsdelivr.net/gh/swithred/minecraft-stream@main/';
+const BASE_URL = window.location.origin + '/';
 const PARTS = ['deltarune.part01','deltarune.part02','deltarune.part03','deltarune.part04'];
 const statusEl=document.getElementById('status'),detailEl=document.getElementById('detail'),fillEl=document.getElementById('fill');
 function setProgress(p){fillEl.style.width=Math.max(0,Math.min(100,p*100))+'%';}
